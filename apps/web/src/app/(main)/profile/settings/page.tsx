@@ -1,0 +1,16 @@
+import type { Metadata } from 'next'
+import { Protected } from '@/components/shared/Protected'
+import { ProfileClient } from '@/components/profile/ProfileClient'
+
+export const metadata: Metadata = {
+  title: 'Настройки',
+  robots: { index: false, follow: false }
+}
+
+export default function ProfileSettingsPage() {
+  return (
+    <Protected>
+      <ProfileClient tab="settings" />
+    </Protected>
+  )
+}
