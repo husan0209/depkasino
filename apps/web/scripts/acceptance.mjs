@@ -384,6 +384,15 @@ function sourceFlow() {
     check(name, !pattern.test(code))
   }
 
+  // Границы ошибок и скелетон перехода: сбой не должен давать белый экран (§23 блок I).
+  const errorBoundary = readFileSync(path.join(srcRoot, 'app/error.tsx'), 'utf8')
+  check('есть граница ошибок с «Повторить»', /Повторить/.test(errorBoundary) && errorBoundary.startsWith("'use client'"))
+  const globalError = readFileSync(path.join(srcRoot, 'app/global-error.tsx'), 'utf8')
+  check('есть последний рубеж для корневого layout', globalError.includes('global-error') === false && /<html/.test(globalError))
+  const loading = readFileSync(path.join(srcRoot, 'app/(main)/loading.tsx'), 'utf8')
+  check('есть скелетон перехода между разделами', loading.includes('MainLoading'))
+  check('live-режим без адреса API предупреждает', /MODE=live, но NEXT_PUBLIC_API_URL пуст/.test(readFileSync(path.join(srcRoot, 'lib/env.ts'), 'utf8')))
+
   const flags = readFileSync(path.join(srcRoot, 'constants/currencies.ts'), 'utf8')
   const enabled = [...flags.matchAll(/FEATURE_[A-Z_]+:\s*(true|false)/g)].filter((match) => match[1] === 'true')
   check('бонусные флаги выключены', enabled.length === 0, enabled.map((match) => match[0]).join(', '))

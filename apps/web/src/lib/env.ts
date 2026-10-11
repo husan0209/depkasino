@@ -15,6 +15,18 @@ export const env = {
 export const isMock = env.apiMode === 'mock'
 
 /**
+ * Опасная конфигурация: режим live без адреса API.
+ * Клиент в этом случае уходит на собственный `/api/v1`, где в сборке живёт мок — на продакшене
+ * это выглядело бы как настоящие балансы и платежи. Громко предупреждаем на сервере при старте.
+ */
+if (!isMock && !env.apiUrl && typeof window === 'undefined') {
+  console.warn(
+    '[env] NEXT_PUBLIC_API_MODE=live, но NEXT_PUBLIC_API_URL пуст: запросы уйдут на /api/v1 (мок-данные). ' +
+      'Укажите адрес API или верните mock-режим.'
+  )
+}
+
+/**
  * Абсолютный адрес сайта для метаданных, sitemap и robots.
  * В продакшене задаётся NEXT_PUBLIC_SITE_URL; локально достаточно localhost.
  */
