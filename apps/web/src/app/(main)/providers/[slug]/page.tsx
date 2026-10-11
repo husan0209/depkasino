@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { GameGrid } from '@/components/casino/GameGrid'
 import { allProviderSlugs, getProvider } from '@/lib/data/catalog'
+import { siteUrl } from '@/lib/env'
 
 export const revalidate = 300
 
@@ -23,8 +24,22 @@ export default async function ProviderPage({ params }: { params: { slug: string 
   const data = await getProvider(params.slug)
   if (!data) notFound()
 
+  const base = siteUrl()
+  // Крошки для поисковой выдачи: провайдер — часть каталога, а не отдельный сайт.
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Главная', item: `${base}/` },
+      { '@type': 'ListItem', position: 2, name: 'Каталог слотов', item: `${base}/casino` },
+      { '@type': 'ListItem', position: 3, name: 'Провайдеры', item: `${base}/providers` },
+      { '@type': 'ListItem', position: 4, name: data.provider.name, item: `${base}/providers/${data.provider.slug}` }
+    ]
+  }
+
   return (
     <div className="container-page mt-6">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       <p className="section-label">Провайдер</p>
       <h1 className="mt-1 text-xl font-semibold text-white md:text-2xl">{data.provider.name}</h1>
       <p className="mt-2 text-sm text-ink-muted">

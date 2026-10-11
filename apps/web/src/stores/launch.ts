@@ -1,19 +1,15 @@
 'use client'
 
 import { create } from 'zustand'
-import type { Currency, Game } from '@/types'
+import type { LaunchDecision } from '@/lib/launch-decision'
+import type { Game } from '@/types'
 
 /**
  * Глобальное состояние launch flow (§8.2).
  * Шиты выбора кошелька живут в корне `(main)` layout, поэтому их можно открыть поверх любой страницы и игры.
  */
 
-export type LaunchDecision =
-  | { kind: 'login' }
-  | { kind: 'play'; currency: Currency }
-  | { kind: 'switch'; currency: Currency; supported: Currency[] }
-  | { kind: 'deposit'; currency: Currency }
-  | { kind: 'unsupported'; currency: Currency; supported: Currency[] }
+export type { LaunchDecision }
 
 export interface PendingLaunch {
   game: Game

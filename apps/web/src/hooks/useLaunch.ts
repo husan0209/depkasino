@@ -7,19 +7,38 @@ import { casinoApi, ApiError, queryKeys } from '@/lib/api'
 import { useAuthStore } from '@/stores/auth'
 import { useWalletStore } from '@/stores/wallet'
 import { useUIStore } from '@/stores/ui'
-import { useLaunchStore, type LaunchDecision } from '@/stores/launch'
-import { CURRENCY_ASSETS, FIAT_ORDER, CRYPTO_ORDER } from '@/constants/currencies'
+import { useLaunchStore } from '@/stores/launch'
+import { CURRENCY_ASSETS } from '@/constants/currencies'
 import { formatAmount } from '@/lib/format'
+import {
+  balanceOf,
+  firstSupported,
+  nonZeroCurrencies,
+  resolveLaunchDecision,
+  switchQuestionKind,
+  type LaunchContext,
+  type LaunchDecision
+} from '@/lib/launch-decision'
 import type { Currency, Game } from '@/types'
 
 /**
  * Launch contract (§8.2) — единый flow с карточки, из превью и из last played.
  * Обязательного выбора валюты перед спином нет: спрашиваем только если выбор реально существует.
+ * Само решение принимает чистая функция `lib/launch-decision` (её проверяет приёмка),
+ * хук только собирает контекст из сторов и выполняет решение.
  */
 
-export function firstSupported(walletCurrencies: Currency[], game: Game): Currency | undefined {
-  const order = [...FIAT_ORDER, ...CRYPTO_ORDER]
-  return order.find((currency) => walletCurrencies.includes(currency) && game.currencies.includes(currency))
+export { firstSupported }
+
+function currentContext(): LaunchContext {
+  const auth = useAuthStore.getState()
+  const wallets = useWalletStore.getState()
+  return {
+    isAuthenticated: auth.isAuthenticated,
+    activeCurrency: wallets.activeCurrency,
+    wallets: wallets.wallets,
+    lastPlayedCurrency: wallets.lastPlayedCurrency ?? undefined
+  }
 }
 
 export function useLaunch() {
@@ -29,47 +48,10 @@ export function useLaunch() {
   const setLaunching = useLaunchStore((state) => state.setLaunching)
 
   /** Решение по правилам §8.2 без обращения к сети. */
-  const resolveDecision = useCallback((game: Game): LaunchDecision => {
-    const auth = useAuthStore.getState()
-    const wallets = useWalletStore.getState()
-
-    // 1. Гость → LoginSheet, после входа launch продолжается.
-    if (!auth.isAuthenticated) return { kind: 'login' }
-
-    const active = wallets.activeCurrency
-    const activeWallet = wallets.getWallet(active)
-    const supported = game.currencies
-
-    // 6. Повторный заход в ту же игру → сразу последняя валюта, без вопроса.
-    const lastPlayed = wallets.lastPlayedCurrency
-    if (lastPlayed && supported.includes(lastPlayed) && (wallets.getWallet(lastPlayed)?.balance ?? 0) > 0) {
-      return { kind: 'play', currency: lastPlayed }
-    }
-
-    // 2. Активный кошелёк не пуст и провайдер принимает валюту → сразу игра.
-    if (activeWallet && activeWallet.balance > 0 && supported.includes(active)) {
-      return { kind: 'play', currency: active }
-    }
-
-    const alternative = firstSupported(
-      wallets.getNonZeroWallets().map((w) => w.currency),
-      game
-    )
-
-    // 3. Активный пуст, но деньги есть в другом кошельке → короткий sheet.
-    if (alternative && alternative !== active && (activeWallet?.balance ?? 0) === 0 && supported.includes(alternative)) {
-      return { kind: 'switch', currency: alternative, supported }
-    }
-
-    // 5. Провайдер не принимает активную валюту → честный выбор, без тихой конвертации.
-    if (!supported.includes(active)) {
-      if (alternative) return { kind: 'switch', currency: alternative, supported }
-      return { kind: 'unsupported', currency: active, supported }
-    }
-
-    // 4. Все кошельки пустые → DepositSheet активной валюты.
-    return { kind: 'deposit', currency: active }
-  }, [])
+  const resolveDecision = useCallback(
+    (game: Game): LaunchDecision => resolveLaunchDecision(game, currentContext()),
+    []
+  )
 
   const play = useCallback(
     async (game: Game, currency: Currency, options?: { demo?: boolean }) => {
@@ -92,10 +74,7 @@ export function useLaunch() {
         if (apiError.code === 'insufficient_funds') {
           useUIStore.getState().openDeposit(currency)
         } else if (apiError.code === 'currency_not_supported') {
-          const fallback = firstSupported(
-            useWalletStore.getState().getNonZeroWallets().map((w) => w.currency),
-            game
-          )
+          const fallback = firstSupported(nonZeroCurrencies(currentContext()), game)
           setPending({
             game,
             decision: fallback
@@ -162,13 +141,13 @@ export function useLaunch() {
 
   /** Текст шита: «В ₽ пусто. Играть с 8 200 ₸?» */
   const switchQuestion = useCallback((currency: Currency, alternative: Currency) => {
-    const wallets = useWalletStore.getState()
-    const active = wallets.getWallet(currency)
-    const target = wallets.getWallet(alternative)
+    const context = currentContext()
     const activeSymbol = CURRENCY_ASSETS[currency].symbol
-    const targetAmount = formatAmount(target?.balance ?? 0, alternative, { context: 'wallet' })
-    if ((active?.balance ?? 0) === 0) return `В ${activeSymbol} пусто. Играть с ${targetAmount}?`
-    return `${activeSymbol} не поддерживается этой игрой. Играть с ${targetAmount}?`
+    const targetAmount = formatAmount(balanceOf(context, alternative), alternative, { context: 'wallet' })
+    // «В ₽ пусто. Играть с 8 200 ₸?» — без обещаний и без конвертации.
+    return switchQuestionKind(context, currency) === 'empty'
+      ? `В ${activeSymbol} пусто. Играть с ${targetAmount}?`
+      : `${activeSymbol} не поддерживается этой игрой. Играть с ${targetAmount}?`
   }, [])
 
   return { launch, launchDemo, play, confirmAlternative, continueAfterLogin, switchQuestion }

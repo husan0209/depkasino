@@ -63,14 +63,14 @@ const has = (html, pattern) => new RegExp(pattern, 'i').test(html)
 
 /* ─────────────────────────── 1. Денежные форматы ─────────────────────────── */
 
-async function moneySuite() {
-  console.log('\n1. Денежные форматы §2.5')
-  const outDir = mkdtempSync(path.join(tmpdir(), 'depkasino-format-'))
-  const outFile = path.join(outDir, 'format-suite.cjs')
+/** Собирает и запускает TS-сьют из src через esbuild — так тесты видят те же модули, что и приложение. */
+async function runSuite(file, label) {
+  const outDir = mkdtempSync(path.join(tmpdir(), 'depkasino-suite-'))
+  const outFile = path.join(outDir, 'suite.cjs')
   try {
     const esbuild = await import('esbuild')
     await esbuild.build({
-      entryPoints: [path.join(here, 'format-suite.ts')],
+      entryPoints: [path.join(here, file)],
       bundle: true,
       platform: 'node',
       format: 'cjs',
@@ -80,19 +80,29 @@ async function moneySuite() {
     })
     const run = spawnSync(process.execPath, [outFile], { encoding: 'utf8' })
     const tail = (run.stdout || '').trim().split('\n').at(-1) ?? 'нет вывода'
-    check(`денежные правила: ${tail}`, run.status === 0, run.stderr?.trim())
+    check(`${label}: ${tail}`, run.status === 0, run.stderr?.trim())
     if (run.status !== 0) console.log(run.stdout)
   } catch (error) {
-    check('денежные правила', false, error.message)
+    check(label, false, error.message)
   } finally {
     rmSync(outDir, { recursive: true, force: true })
   }
 }
 
+async function moneySuite() {
+  console.log('\n1. Денежные форматы §2.5')
+  await runSuite('format-suite.ts', 'денежные правила')
+}
+
+async function launchSuite() {
+  console.log('\n2. Приоритеты запуска §8.2')
+  await runSuite('launch-suite.ts', 'сценарии запуска')
+}
+
 /* ────────────────────── 2. Денежные сценарии через API ───────────────────── */
 
 async function apiFlow() {
-  console.log('\n2. Денежные и кассовые сценарии (мок-контракты Частей 2–4)')
+  console.log('\n3. Денежные и кассовые сценарии (мок-контракты Частей 2–4)')
 
   const reset = await api('POST', '/dev/reset')
   check('состояние демо сброшено', reset.status === 200, `HTTP ${reset.status}`)
@@ -251,14 +261,14 @@ const forbiddenOnPages = [
 ]
 
 async function pagesFlow() {
-  console.log('\n3. Страницы: обязательные блоки и запреты §24')
+  console.log('\n4. Страницы: обязательные блоки и запреты §24')
 
   for (const [route, expected] of pages) {
     const { status } = await page(route)
     check(`${route} → ${expected}`, status === expected, `получили ${status}`)
   }
 
-  console.log('\n4. Содержимое страниц')
+  console.log('\n5. Содержимое страниц')
   for (const [route, name, pattern] of pageRules) {
     const { html } = await page(route)
     check(`${route}: ${name}`, has(html, pattern.source))
@@ -278,7 +288,72 @@ async function pagesFlow() {
   check('несуществующий тикет не крутит вечный скелет', missingTicket.status === 200)
 }
 
-/* ────────────────────────── 5. Скан исходников ──────────────────────────── */
+/* ─────────────────────────────── 6. SEO-слой ─────────────────────────────── */
+
+async function seoFlow() {
+  console.log('\n6. SEO: robots, sitemap, разметка, OG-картинки')
+
+  // robots.txt закрывает приватные разделы и указывает на карту сайта.
+  const robots = await fetch(`${BASE}/robots.txt`)
+  const robotsText = await robots.text()
+  check('robots.txt отдаётся', robots.status === 200 && robotsText.includes('User-Agent'))
+  check('robots.txt закрывает приватные разделы', ['/wallet', '/profile', '/history', '/kyc', '/support', '/referral', '/favorites', '/play'].every((path) => robotsText.includes(`Disallow: ${path}`)))
+  check('robots.txt ссылается на sitemap', /Sitemap:\s*\S+\/sitemap\.xml/.test(robotsText))
+
+  // sitemap.xml: только публичные страницы, все игры и провайдеры на месте.
+  const sitemap = await fetch(`${BASE}/sitemap.xml`)
+  const sitemapXml = await sitemap.text()
+  const urls = [...sitemapXml.matchAll(/<loc>([^<]+)</g)].map((match) => match[1])
+  check('sitemap.xml отдаётся как XML', sitemap.status === 200 && (sitemap.headers.get('content-type') ?? '').includes('xml'))
+  check('в карте 50+ адресов', urls.length >= 50, `нашли ${urls.length}`)
+  check('в карте нет приватных разделов', !urls.some((url) => /\/(wallet|profile|history|kyc|support|referral|favorites|play|login|register)(\/|$)/.test(url)))
+  check('в карте нет дублей', new Set(urls).size === urls.length)
+  check('в карте есть игры и провайдеры', urls.some((url) => url.includes('/casino/')) && urls.some((url) => url.includes('/providers/')))
+
+  // Разметка Schema.org на SEO-страницах: крошки и карточка игры.
+  const gamePage = await page('/casino/sweet-bonanza')
+  const gameLd = gamePage.html.match(/<script type="application\/ld\+json">(.*?)<\/script>/s)
+  let gameData = null
+  try {
+    gameData = gameLd ? JSON.parse(gameLd[1]) : null
+  } catch {
+    gameData = null
+  }
+  const graph = gameData?.['@graph'] ?? []
+  const breadcrumbs = graph.find((node) => node['@type'] === 'BreadcrumbList')
+  const app = graph.find((node) => node['@type'] === 'SoftwareApplication')
+  check('карточка игры: JSON-LD разбирается', Array.isArray(graph) && graph.length === 2)
+  check('карточка игры: крошки из 4 шагов', (breadcrumbs?.itemListElement ?? []).length === 4)
+  check('карточка игры: offer по минимальной ставке', typeof app?.offers?.price === 'number' && !!app?.offers?.priceCurrency)
+
+  const providerPage = await page('/providers/pragmatic-play')
+  const providerLd = providerPage.html.match(/<script type="application\/ld\+json">(.*?)<\/script>/s)
+  let providerData = null
+  try {
+    providerData = providerLd ? JSON.parse(providerLd[1]) : null
+  } catch {
+    providerData = null
+  }
+  check('провайдер: крошки разбираются', providerData?.['@type'] === 'BreadcrumbList' && providerData.itemListElement.length === 4)
+
+  // OG-картинка отдаётся тем адресом, который стоит в мета-теге.
+  const ogUrl = gamePage.html.match(/<meta property="og:image" content="([^"]+)"/)?.[1]
+  const ogResponse = ogUrl ? await fetch(ogUrl) : null
+  check('og:image отвечает PNG 1200×630', !!ogResponse && ogResponse.status === 200 && (ogResponse.headers.get('content-type') ?? '').includes('image/png'), ogUrl ?? 'нет мета-тега')
+  if (ogResponse) {
+    check('og:image весит больше 10 КБ (не пустышка)', Number(ogResponse.headers.get('content-length') ?? 0) > 10_000 || (await ogResponse.arrayBuffer()).byteLength > 10_000)
+  }
+
+  // Приватные разделы не индексируются даже без robots.txt.
+  const wallet = await page('/wallet')
+  check('приватные страницы помечены noindex', /name="robots" content="[^"]*noindex/.test(wallet.html))
+  const home = await page('/')
+  check('витрина индексируется', /name="robots" content="[^"]*index/.test(home.html) || !/noindex/.test(home.html))
+  check('canonical на каталоге', /rel="canonical" href="[^"]*\/casino"/.test((await page('/casino')).html))
+  check('язык страницы — русский', (await page('/')).html.includes('<html lang="ru"'))
+}
+
+/* ────────────────────────── 7. Скан исходников ──────────────────────────── */
 
 const sourceRules = [
   ['нет WebSocket/Socket.IO', /socket\.io|new WebSocket\(|io\(\)/],
@@ -301,7 +376,7 @@ function walk(dir, files = []) {
 }
 
 function sourceFlow() {
-  console.log('\n5. Исходники: прямые запреты')
+  console.log('\n7. Исходники: прямые запреты')
   const files = walk(srcRoot)
   const code = files.map((file) => stripComments(readFileSync(file, 'utf8'))).join('\n')
 
@@ -329,8 +404,10 @@ async function main() {
   }
 
   await moneySuite()
+  await launchSuite()
   await apiFlow()
   await pagesFlow()
+  await seoFlow()
   sourceFlow()
 
   console.log(`\n${'─'.repeat(60)}`)

@@ -18,9 +18,9 @@ npm run lint                # next lint
 npm run acceptance          # приёмка: деньги, API-сценарии, страницы, запреты §24 (нужен запущенный сервер)
 ```
 
-`npm run acceptance` — 91 проверка по Части 5 и 5.1: исполняемая спецификация денежных форматов (§2.5),
-полный денежный путь через API, обязательные блоки страниц и скан запретов §24. Скрипт идемпотентен:
-сам сбрасывает демо-состояние, поэтому его можно гонять после каждой правки.
+`npm run acceptance` — 110 проверок по Части 5 и 5.1: исполняемая спецификация денежных форматов (§2.5),
+сценарии запуска по §8.2, полный денежный путь через API, обязательные блоки страниц, SEO-слой и скан
+запретов §24. Скрипт идемпотентен: сам сбрасывает демо-состояние, поэтому его можно гонять после каждой правки.
 
 ## Режимы API
 
@@ -43,6 +43,10 @@ npm run acceptance          # приёмка: деньги, API-сценарии
   Игровые экраны: `/play` (мок-поле), `/play/remote` (iframe провайдера), `/play/error?code=` (7 кодов).
 - **Аккаунт.** Регистрация/вход, OAuth (Google, Telegram), verify-email, forgot/reset, профиль (Данные/Безопасность/
   Сессии/Настройки), KYC (6 состояний), тикеты поддержки, реферальный кабинет.
+- **SEO-прослойка.** `robots.txt` и `sitemap.xml` собираются из данных каталога (57 публичных адресов,
+  приватные разделы закрыты и там, и через `noindex`), на карточках игр и провайдеров — разметка Schema.org
+  (крошки + карточка игры с минимальной ставкой), OG-картинки 1200×630 генерируются на сборке
+  (`docs/preview/og-home.png`, `docs/preview/og-game-sweet-bonanza.png`).
 - **Деньги.** Мультивалютный кошелёк `RUB · UAH · BYN · KZT · UZS · USDT TRC20 · BTC` с отдельными балансами,
   касса `DepositSheet` (один экран) и `WithdrawSheet` (проверки KYC → пустой кошелёк → метод той же валюты → `ConfirmModal`),
   история транзакций и ставок. Конвертации нет нигде.
@@ -56,7 +60,8 @@ apps/web/src
 ├── app            # (auth) и (main) группы, play-роуты, api/v1/[...path]
 ├── components     # ui · layout · auth · casino · game · wallet · profile · kyc · support · referral · shared
 ├── hooks          # useLaunch, usePayments, useWalletData, useMounted, useMediaQuery …
-├── lib            # api/* (9 доменов), data/catalog.ts (SSR), format.ts (деньги), session-hint.ts
+├── assets/fonts   # TTF для OG-картинок (у next/og нет кириллицы) + лицензия
+├── lib            # api/* (9 доменов), data/catalog.ts (SSR), format.ts (деньги), launch-decision.ts, og-card.tsx
 ├── mocks          # сервер, каталог, гео, платёжные методы, состояние демо-аккаунта
 ├── stores         # geo · auth · wallet · ui · toast · launch
 ├── constants      # CURRENCY_ASSETS, FEATURE_FLAGS (все false), STORAGE_KEYS

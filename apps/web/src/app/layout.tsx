@@ -3,10 +3,10 @@ import Script from 'next/script'
 import '@/styles/globals.css'
 import { SESSION_HINT_SCRIPT } from '@/lib/session-hint'
 import { AppProviders } from '@/components/shared/AppProviders'
-import { env } from '@/lib/env'
+import { env, siteUrl } from '@/lib/env'
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
+  metadataBase: new URL(siteUrl()),
   title: {
     default: `${env.siteName} — слоты онлайн`,
     template: `%s | ${env.siteName}`

@@ -14,6 +14,14 @@ export const env = {
 
 export const isMock = env.apiMode === 'mock'
 
+/**
+ * Абсолютный адрес сайта для метаданных, sitemap и robots.
+ * В продакшене задаётся NEXT_PUBLIC_SITE_URL; локально достаточно localhost.
+ */
+export function siteUrl(): string {
+  return (env.siteUrl || 'http://localhost:3000').replace(/\/$/, '')
+}
+
 /** База API на клиенте. В live-режиме обязателен NEXT_PUBLIC_API_URL. */
 export function clientApiBase(): string {
   if (env.apiUrl) return env.apiUrl.replace(/\/$/, '')
