@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import { useQuery } from '@tanstack/react-query'
 import { Heart, Play } from 'lucide-react'
@@ -13,6 +12,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { casinoApi as api } from '@/lib/api'
 import { formatPercent } from '@/lib/format'
 import { cn } from '@/lib/cn'
+import { CoverImage } from '@/components/shared/CoverImage'
 
 const volatilityLabels = {
   low: 'Низкая',
@@ -69,7 +69,7 @@ export function GamePreviewSheet() {
       ) : (
         <div className="space-y-5">
           <div className="relative overflow-hidden rounded-2xl border border-line">
-            <Image
+            <CoverImage
               src={data.game.cover}
               alt={data.game.title}
               width={640}
@@ -143,7 +143,7 @@ export function GamePreviewSheet() {
                     onClick={close}
                     className="overflow-hidden rounded-xl border border-line bg-bg-card transition-colors hover:border-accent/50"
                   >
-                    <Image src={game.cover} alt={game.title} width={200} height={200} className="h-auto w-full" />
+                    <CoverImage src={game.cover} alt={game.title} width={200} height={200} className="h-auto w-full" />
                     <p className="truncate px-2 py-1.5 text-2xs text-ink-muted">{game.title}</p>
                   </Link>
                 ))}

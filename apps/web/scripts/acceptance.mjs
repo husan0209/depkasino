@@ -182,11 +182,11 @@ async function apiFlow() {
   const payout = await api('POST', '/referral/withdraw', { currency: 'RUB', amount: 350 }, token)
   check('бонус реферала выводится', payout.status === 201, `HTTP ${payout.status}`)
 
-  const launch = await api('POST', '/launch', { slug: 'sweet-bonanza', currency: 'RUB' })
+  const launch = await api('POST', '/launch', { slug: 'sweet-bonanza', currency: 'RUB' }, token)
   check('запуск реальной игры ведёт на /play', launch.json?.url?.startsWith('/play?'), launch.json?.url)
   const demo = await api('POST', '/launch', { slug: 'sweet-bonanza', demo: true })
   check('демо запускается без авторизации', demo.json?.url?.includes('demo=1') === true, demo.json?.url)
-  const unsupported = await api('POST', '/launch', { slug: 'gates-of-olympus', currency: 'UZS' })
+  const unsupported = await api('POST', '/launch', { slug: 'gates-of-olympus', currency: 'UZS' }, token)
   check('неподдерживаемая валюта не конвертируется', unsupported.status === 422 && unsupported.json?.code === 'currency_not_supported')
 
   const emptyLogin = await api('POST', '/auth/login', { email: 'bad', password: '1' })
@@ -242,7 +242,7 @@ const pageRules = [
   ['/', 'футер: методы текущего гео', /Способы пополнения/],
   ['/', 'подсказка роли для первого кадра', /data-session/],
   ['/casino', 'счётчик результатов', /Найдено/],
-  ['/casino', 'первая страница каталога в HTML', /%2Fcovers%2F/],
+  ['/casino', 'первая страница каталога в HTML', /\/covers\//],
   ['/casino/sweet-bonanza', 'SEO-поля игры', /RTP[\s\S]*Волатильность/],
   ['/casino/sweet-bonanza', 'кнопки запуска', /Играть[\s\S]*Демо/],
   ['/providers', 'студии со ссылками', /\/providers\/[a-z-]+/],
@@ -281,8 +281,10 @@ async function pagesFlow() {
     check(`витрина без «${name}»`, check_)
   }
 
-  const optimized = await fetch(`${BASE}/_next/image?url=%2Fcovers%2Fsweet-bonanza.svg&w=384&q=75`)
-  check('оптимизатор отдаёт обложки', optimized.status === 200 && (optimized.headers.get('content-type') ?? '').includes('svg'))
+  // Обложки витрины отдаются напрямую: локальные SVG минуют оптимизатор next/image
+  // (CoverImage), чьи самообращения к серверу раньше подвешивали запросы.
+  const cover = await fetch(`${BASE}/covers/sweet-bonanza.svg`)
+  check('обложки доступны витрине напрямую', cover.status === 200 && (cover.headers.get('content-type') ?? '').includes('svg'))
 
   const missingTicket = await page('/support/TCK-0000')
   check('несуществующий тикет не крутит вечный скелет', missingTicket.status === 200)

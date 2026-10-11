@@ -24,7 +24,9 @@ async function run(request: Request, segments: string[]): Promise<NextResponse> 
     segments,
     query: url.searchParams,
     body,
-    hostname: request.headers.get('host')?.split(':')[0] ?? 'localhost'
+    hostname: request.headers.get('host')?.split(':')[0] ?? 'localhost',
+    auth: request.headers.get('authorization') ?? '',
+    refreshTokenHeader: request.headers.get('x-refresh-token') ?? ''
   })
 
   return NextResponse.json(result.body, { status: result.status })

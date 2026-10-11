@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import { useQueryClient } from '@tanstack/react-query'
 import { Heart, Play } from 'lucide-react'
@@ -12,6 +11,7 @@ import { useFavorites } from '@/hooks/useWalletData'
 import { casinoApi, queryKeys } from '@/lib/api'
 import { formatPercent } from '@/lib/format'
 import { cn } from '@/lib/cn'
+import { CoverImage } from '@/components/shared/CoverImage'
 import type { Game } from '@/types'
 
 const volatilityLabels = { low: 'Низкая', medium: 'Средняя', high: 'Высокая' } as const
@@ -56,7 +56,7 @@ export function GameDetail({ game, similar }: { game: Game; similar: Game[] }) {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,420px)_1fr]">
         <div className="relative overflow-hidden rounded-3xl border border-line bg-bg-card">
-          <Image src={game.cover} alt={game.title} width={640} height={640} priority className="h-auto w-full" />
+          <CoverImage src={game.cover} alt={game.title} width={640} height={640} priority className="h-auto w-full" />
           {game.badge && (
             <div className="absolute left-3 top-3">
               <Badge variant={game.badge === 'NEW' ? 'new' : 'hot'}>{game.badge}</Badge>

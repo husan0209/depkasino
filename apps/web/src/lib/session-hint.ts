@@ -10,7 +10,7 @@
 
 export const SESSION_HINT_ATTR = 'data-session'
 
-const TOKEN_KEY = 'dk_access_token'
+export const TOKEN_KEY = 'dk_access_token'
 
 /** Выполняется до первой отрисовки (next/script · beforeInteractive). */
 export const SESSION_HINT_SCRIPT = `(function(){try{var t=window.localStorage.getItem('${TOKEN_KEY}');document.documentElement.setAttribute('${SESSION_HINT_ATTR}',t?'player':'guest')}catch(e){document.documentElement.setAttribute('${SESSION_HINT_ATTR}','guest')}})();`

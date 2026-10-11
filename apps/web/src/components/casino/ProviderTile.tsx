@@ -1,8 +1,8 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import { cn } from '@/lib/cn'
+import { CoverImage } from '@/components/shared/CoverImage'
 import type { Provider } from '@/types'
 
 /** Логотип провайдера — цветная карточка, не серая буквенная иконка (§Don't-лист). */
@@ -16,7 +16,7 @@ export function ProviderTile({ provider, className }: { provider: Provider; clas
       )}
       aria-label={`Игры ${provider.name}`}
     >
-      <Image
+      <CoverImage
         src={`/providers/${provider.slug}.svg`}
         alt={provider.name}
         width={240}

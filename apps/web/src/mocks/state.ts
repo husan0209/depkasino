@@ -153,6 +153,11 @@ function mockReferrals(): ReferralEntry[] {
 
 export interface MockState {
   user: User | null
+  /**
+   * Токены активной сессии. Без них мок считал залогиненным любого посетителя,
+   * и гостевые сценарии ТЗ (смотрит слоты без входа, запуск → LoginSheet) не жили.
+   */
+  session: { access: string; refresh: string } | null
   /** Пароль демо-аккаунта: смена пароля проверяет его, как настоящий бэкенд. */
   password: string
   wallets: WalletBalance[]
@@ -187,6 +192,7 @@ export interface PaymentIntent {
 
 function createState(): MockState {
   return {
+    session: null,
     user: mockUser(),
     password: 'secret123',
     wallets: mockWallets(),

@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Info, Play } from 'lucide-react'
@@ -9,6 +8,7 @@ import { formatRelativeTime } from '@/lib/dates'
 import { useUIStore } from '@/stores/ui'
 import { useLaunch } from '@/hooks/useLaunch'
 import { cn } from '@/lib/cn'
+import { CoverImage } from '@/components/shared/CoverImage'
 import type { Game } from '@/types'
 
 /**
@@ -31,7 +31,7 @@ export function GameCard({ game, priority = false, compact = false }: { game: Ga
         className="block w-full overflow-hidden rounded-2xl border border-line bg-bg-card text-left transition-colors hover:border-accent/50"
       >
         <span className="relative block aspect-square w-full overflow-hidden">
-          <Image
+          <CoverImage
             src={game.cover}
             alt={game.title}
             fill
@@ -112,7 +112,7 @@ export function LastPlayedCard({ game, playedAt }: { game: Game; playedAt: strin
         className="block w-full overflow-hidden rounded-2xl border border-line bg-bg-card transition-colors hover:border-accent/50"
       >
         <span className="relative block aspect-square w-full">
-          <Image src={game.cover} alt={game.title} fill sizes="132px" className="object-cover" />
+          <CoverImage src={game.cover} alt={game.title} fill sizes="132px" className="object-cover" />
         </span>
       </button>
       <button

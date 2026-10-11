@@ -15,6 +15,10 @@ export interface MockRequest {
   query: URLSearchParams
   body: Record<string, unknown>
   hostname: string
+  /** Заголовок Authorization целиком. */
+  auth: string
+  /** Заголовок X-Refresh-Token — им клиент продлевает сессию. */
+  refreshTokenHeader: string
 }
 
 export interface MockResponse {
@@ -84,11 +88,31 @@ const CRYPTO_ADDRESSES: Record<string, string> = {
   BTC: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh'
 }
 
+let tokenSeq = 0
+function nextToken(kind: 'access' | 'refresh') {
+  tokenSeq += 1
+  return `mock-${kind}-${tokenSeq}`
+}
+function openSession(state: ReturnType<typeof getState>) {
+  state.session = { access: nextToken('access'), refresh: nextToken('refresh') }
+  return state.session
+}
+
 export function handleMockRequest(req: MockRequest): MockResponse {
   const { method, segments, query, body } = req
   const path = segments.join('/')
   const state = getState()
   autoConfirmPayments()
+
+  // Сессия: защищённые домены отвечают 401 без валидного Bearer-токена, как настоящий бэкенд.
+  const bearer = req.auth.startsWith('Bearer ') ? req.auth.slice(7) : ''
+  const authed = bearer.length > 0 && state.session?.access === bearer
+  const PROTECTED = ['users/', 'wallet', 'payments', 'favorites', 'history', 'launch', 'kyc', 'support', 'referral']
+  // Демо-запуск публичен (§23: демо без авторизации), реальная игра — только с сессией.
+  const publicInProtected = path === 'history/feed' || (path === 'launch' && method === 'POST' && body.demo === true)
+  if (!authed && !publicInProtected && PROTECTED.some((prefix) => path === prefix.replace(/\/$/, '') || path.startsWith(prefix))) {
+    return fail(401, 'unauthorized', 'Не авторизован')
+  }
 
   /* ───────── geo ───────── */
   if (path === 'geo' && method === 'GET') {
@@ -105,7 +129,8 @@ export function handleMockRequest(req: MockRequest): MockResponse {
     if (!state.user) state.user = { ...(getState().user ?? {}) as User }
     state.user = { ...state.user, email }
     state.password = password
-    return ok({ user: state.user, accessToken: 'mock-access', refreshToken: 'mock-refresh' })
+    const session = openSession(state)
+    return ok({ user: state.user, accessToken: session.access, refreshToken: session.refresh })
   }
 
   if (path === 'auth/register' && method === 'POST') {
@@ -123,20 +148,29 @@ export function handleMockRequest(req: MockRequest): MockResponse {
         state.wallets.push({ currency, balance: 0, updatedAt: new Date().toISOString() } as (typeof state.wallets)[number])
       }
     }
-    return ok({ user: state.user, accessToken: 'mock-access', refreshToken: 'mock-refresh' }, 201)
+    const session = openSession(state)
+    return ok({ user: state.user, accessToken: session.access, refreshToken: session.refresh }, 201)
   }
 
   if (path === 'auth/refresh' && method === 'POST') {
-    return state.user ? ok({ accessToken: 'mock-access' }) : fail(401, 'unauthorized', 'Сессия истекла')
+    const incoming = req.refreshTokenHeader || String(body.refreshToken ?? '')
+    if (state.session && incoming && incoming === state.session.refresh) {
+      state.session = { access: nextToken('access'), refresh: state.session.refresh }
+      return ok({ accessToken: state.session.access })
+    }
+    return fail(401, 'unauthorized', 'Сессия истекла')
   }
 
   if (path === 'auth/logout' && method === 'POST') {
+    state.session = null
     return ok({ ok: true })
   }
 
   if (path === 'auth/oauth' && method === 'POST') {
     const provider = String(body.provider ?? 'google')
-    return ok({ user: { ...state.user, email: `player@${provider}.com` }, accessToken: 'mock-access', refreshToken: 'mock-refresh' })
+    state.user = { ...state.user, email: `player@${provider}.com` } as typeof state.user
+    const session = openSession(state)
+    return ok({ user: state.user, accessToken: session.access, refreshToken: session.refresh })
   }
 
   if (path === 'auth/forgot-password' && method === 'POST') {

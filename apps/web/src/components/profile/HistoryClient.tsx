@@ -1,7 +1,7 @@
 'use client'
 
+import { CoverImage } from '@/components/shared/CoverImage'
 import { useMemo, useState } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { useQuery } from '@tanstack/react-query'
 import { Gamepad2 } from 'lucide-react'
@@ -102,7 +102,7 @@ export function HistoryClient() {
           data.items.map((bet) => (
             <div key={bet.id} className="flex items-center gap-3 rounded-2xl border border-line bg-bg-card p-3">
               <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl">
-                <Image src={coverFor(bet.game.slug)} alt="" fill sizes="44px" className="object-cover" />
+                <CoverImage src={coverFor(bet.game.slug)} alt="" fill sizes="44px" className="object-cover" />
               </span>
               <div className="min-w-0 flex-1">
                 <Link href={`/casino/${bet.game.slug}`} className="block truncate text-sm font-medium text-white hover:text-accent">

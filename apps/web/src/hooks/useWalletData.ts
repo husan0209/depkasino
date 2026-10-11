@@ -27,10 +27,11 @@ export function useKycStatus() {
 
 /** Избранное: optimistic update (§18). */
 export function useFavorites() {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   return useQuery({
     queryKey: queryKeys.favorites,
     queryFn: () => casinoApi.favorites(),
-    enabled: !isMock ? true : true,
+    enabled: isAuthenticated,
     staleTime: 60_000
   })
 }

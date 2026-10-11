@@ -58,7 +58,8 @@ api.interceptors.response.use(
     const status = error.response?.status
     const original = error.config as (typeof error.config & { _retry?: boolean }) | undefined
 
-    if (status === 401 && original && !original._retry) {
+    const refresh = typeof window === 'undefined' ? null : window.localStorage.getItem(REFRESH_KEY)
+    if (status === 401 && original && !original._retry && refresh) {
       original._retry = true
       try {
         const { data } = await axios.post(`${clientApiBase()}/auth/refresh`, null, {

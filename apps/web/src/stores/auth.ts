@@ -3,6 +3,7 @@
 import { create } from 'zustand'
 import { authApi } from '@/lib/api'
 import { setTokens } from '@/lib/api/client'
+import { TOKEN_KEY } from '@/lib/session-hint'
 import type { LoginCredentials, RegisterPayload, User } from '@/types'
 
 interface AuthStore {
@@ -43,6 +44,11 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
 
   async fetchMe() {
+    // Гость не должен стучаться в защищённый /users/me: 401 в консоли на каждой странице.
+    if (typeof window !== 'undefined' && !window.localStorage.getItem(TOKEN_KEY)) {
+      set({ user: null, isAuthenticated: false, isLoading: false })
+      return
+    }
     set({ isLoading: true })
     try {
       const user = await authApi.me()

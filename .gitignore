@@ -21,3 +21,6 @@ yarn-error.log*
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# снимки visual-smoke (локальная проверка)
+apps/web/visual-smoke-out/

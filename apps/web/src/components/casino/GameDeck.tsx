@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion, useMotionValue, useTransform } from 'framer-motion'
@@ -9,10 +8,13 @@ import { Badge, Button, CurrencyAmount, QueryError, Skeleton } from '@/component
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { casinoApi, queryKeys, type FeedWin } from '@/lib/api'
 import { useLaunch } from '@/hooks/useLaunch'
+import { useUIStore } from '@/stores/ui'
+import { useAuthStore } from '@/stores/auth'
 import { useFavorites, useLiveFeed } from '@/hooks/useWalletData'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { useIsDesktop, useIsTabletUp } from '@/hooks/useMediaQuery'
 import { cn } from '@/lib/cn'
+import { CoverImage } from '@/components/shared/CoverImage'
 import type { Game } from '@/types'
 
 /**
@@ -86,8 +88,16 @@ export function GameDeck({ initialGames, className }: { initialGames?: Game[]; c
     setSeen(new Set())
   }, [games])
 
+  const openLogin = useUIStore((state) => state.openLogin)
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+
   const toggleFavorite = useCallback(
     (slug: string) => {
+      // Избранное — защищённый домен: гостю предлагаем вход, а не 401 в тосте.
+      if (!isAuthenticated) {
+        openLogin('favorite')
+        return
+      }
       const favorite = !(favorites?.slugs ?? []).includes(slug)
       setBurstSlug(slug)
       setTimeout(() => setBurstSlug(null), 450)
@@ -99,7 +109,7 @@ export function GameDeck({ initialGames, className }: { initialGames?: Game[]; c
         void queryClient.invalidateQueries({ queryKey: queryKeys.favorites })
       })
     },
-    [favorites?.slugs, queryClient]
+    [favorites?.slugs, queryClient, isAuthenticated, openLogin]
   )
 
   if (isError) {
@@ -203,7 +213,7 @@ export function GameDeck({ initialGames, className }: { initialGames?: Game[]; c
               className="flex items-center gap-3 rounded-2xl border border-line bg-bg-card p-2 text-left transition-colors hover:border-accent/50"
             >
               <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl">
-                <Image src={game.cover} alt="" fill sizes="48px" className="object-cover" />
+                <CoverImage src={game.cover} alt="" fill sizes="48px" className="object-cover" />
               </span>
               <span className="min-w-0">
                 <span className="block truncate text-xs font-medium text-white">{game.title}</span>
@@ -298,7 +308,7 @@ function DeckCard({
       onTap={handleTap}
     >
       <div className="relative h-full overflow-hidden rounded-3xl border border-line bg-bg-card shadow-card">
-        <Image src={game.cover} alt={game.title} fill sizes="(max-width: 768px) 92vw, 520px" className="object-cover" priority />
+        <CoverImage src={game.cover} alt={game.title} fill sizes="(max-width: 768px) 92vw, 520px" className="object-cover" priority />
         <div className="absolute inset-0 bg-gradient-to-t from-bg-primary via-bg-primary/25 to-transparent" />
 
         <div className="absolute left-4 top-4 flex flex-col items-start gap-2">
