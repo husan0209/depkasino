@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600" role="img" aria-label="big-atlantis-frenzy">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="38%" r="72%">
+      <stop offset="0%" stop-color="#1F5E8C" stop-opacity="0.5"/>
+      <stop offset="55%" stop-color="#06141F"/>
+      <stop offset="100%" stop-color="#08080F"/>
+    </radialGradient>
+    <linearGradient id="coinGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7FBFD4"/>
+      <stop offset="100%" stop-color="#1F5E8C"/>
+    </linearGradient>
+    <linearGradient id="pyramidGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7FBFD4"/>
+      <stop offset="100%" stop-color="#1F5E8C"/>
+    </linearGradient>
+    <linearGradient id="flameGrad" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#1F5E8C"/>
+      <stop offset="100%" stop-color="#2E9C8C"/>
+    </linearGradient>
+    <radialGradient id="vig" cx="50%" cy="42%" r="78%">
+      <stop offset="52%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#05050A" stop-opacity="0.72"/>
+    </radialGradient>
+    <linearGradient id="foot" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="62%" stop-color="#07070D" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#07070D" stop-opacity="0.8"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="600" fill="url(#bg)"/>
+  <g><path d="M0 300 C 120 268, 240 332, 360 300 C 480 268, 560 316, 600 300 L600 600 L0 600 Z" fill="#2E9C8C" opacity="0.45"/><path d="M0 400 C 120 368, 240 432, 360 400 C 480 368, 560 416, 600 400 L600 600 L0 600 Z" fill="#1F5E8C" opacity="0.45"/><path d="M0 500 C 120 468, 240 532, 360 500 C 480 468, 560 516, 600 500 L600 600 L0 600 Z" fill="#06141F" opacity="0.45"/><circle cx="430" cy="190" r="84" fill="none" stroke="#7FBFD4" stroke-width="12.6" opacity="0.5"/><circle cx="150" cy="160" r="40" fill="#7FBFD4" opacity="0.68"/><g transform="translate(210 380) rotate(-14)">
+        <path d="M0 -52 L44.199999999999996 -13 L0 52 L-44.199999999999996 -13 Z" fill="#7FBFD4" opacity="0.95"/>
+        <path d="M0 -52 L44.199999999999996 -13 L0 -10.4 Z" fill="#ffffff" opacity="0.28"/>
+        <path d="M-44.199999999999996 -13 L0 -10.4 L0 52 Z" fill="#000000" opacity="0.18"/>
+      </g><g transform="translate(400 360) rotate(10)">
+        <path d="M0 -34 L28.9 -8.5 L0 34 L-28.9 -8.5 Z" fill="#fff" opacity="0.95"/>
+        <path d="M0 -34 L28.9 -8.5 L0 -6.800000000000001 Z" fill="#ffffff" opacity="0.28"/>
+        <path d="M-28.9 -8.5 L0 -6.800000000000001 L0 34 Z" fill="#000000" opacity="0.18"/>
+      </g><path transform="translate(120 250)" d="M0.0 -22.0 L5.8 -8.0 L20.9 -6.8 L9.4 3.1 L12.9 17.8 L0.0 9.9 L-12.9 17.8 L-9.4 3.1 L-20.9 -6.8 L-5.8 -8.0 Z" fill="#7FBFD4" opacity="0.82"/></g>
+  <rect width="600" height="600" fill="url(#vig)"/>
+  <rect width="600" height="600" fill="url(#foot)"/>
+  <rect x="10" y="10" width="580" height="580" rx="26" fill="none" stroke="#ffffff" stroke-opacity="0.07"/>
+  <rect width="600" height="600" fill="none" stroke="#000" stroke-opacity="0.35" stroke-width="16"/>
+</svg>

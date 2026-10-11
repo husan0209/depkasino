@@ -1,0 +1,16 @@
+{
+  "name": "depkasino",
+  "version": "0.5.0",
+  "private": true,
+  "description": "Casino platform (CIS, mobile-first). Part 5: Next.js web client.",
+  "workspaces": ["apps/*"],
+  "scripts": {
+    "dev": "npm --workspace @depkasino/web run dev",
+    "build": "npm --workspace @depkasino/web run build",
+    "start": "npm --workspace @depkasino/web run start",
+    "lint": "npm --workspace @depkasino/web run lint",
+    "typecheck": "npm --workspace @depkasino/web run typecheck",
+    "acceptance": "npm --workspace @depkasino/web run acceptance"
+  },
+  "engines": { "node": ">=20" }
+}

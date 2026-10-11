@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600" role="img" aria-label="bonanza-billion">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="38%" r="72%">
+      <stop offset="0%" stop-color="#C97A2E" stop-opacity="0.5"/>
+      <stop offset="55%" stop-color="#1C1004"/>
+      <stop offset="100%" stop-color="#08080F"/>
+    </radialGradient>
+    <linearGradient id="coinGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#D9C98C"/>
+      <stop offset="100%" stop-color="#C97A2E"/>
+    </linearGradient>
+    <linearGradient id="pyramidGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#D9C98C"/>
+      <stop offset="100%" stop-color="#C97A2E"/>
+    </linearGradient>
+    <linearGradient id="flameGrad" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#C97A2E"/>
+      <stop offset="100%" stop-color="#C9A03D"/>
+    </linearGradient>
+    <radialGradient id="vig" cx="50%" cy="42%" r="78%">
+      <stop offset="52%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#05050A" stop-opacity="0.72"/>
+    </radialGradient>
+    <linearGradient id="foot" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="62%" stop-color="#07070D" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#07070D" stop-opacity="0.8"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="600" fill="url(#bg)"/>
+  <g><g transform="translate(210 340)">
+        <circle r="96" fill="url(#coinGrad)"/>
+        <circle r="67.19999999999999" fill="none" stroke="#ffffff" stroke-opacity="0.38" stroke-width="11.52"/>
+        <path d="M0 -40.32 L34.56 0 L0 40.32 L-34.56 0 Z" fill="#8A5A00" opacity="0.75"/>
+      </g><g transform="translate(390 300)">
+        <circle r="74" fill="url(#coinGrad)"/>
+        <circle r="51.8" fill="none" stroke="#ffffff" stroke-opacity="0.38" stroke-width="8.879999999999999"/>
+        <path d="M0 -31.08 L26.64 0 L0 31.08 L-26.64 0 Z" fill="#8A5A00" opacity="0.75"/>
+      </g><g transform="translate(300 190)">
+        <circle r="58" fill="url(#coinGrad)"/>
+        <circle r="40.599999999999994" fill="none" stroke="#ffffff" stroke-opacity="0.38" stroke-width="6.96"/>
+        <path d="M0 -24.36 L20.88 0 L0 24.36 L-20.88 0 Z" fill="#8A5A00" opacity="0.75"/>
+      </g><path transform="translate(150 190)" d="M0.0 -26.0 L6.9 -9.5 L24.7 -8.0 L11.1 3.6 L15.3 21.0 L0.0 11.7 L-15.3 21.0 L-11.1 3.6 L-24.7 -8.0 L-6.9 -9.5 Z" fill="#D9C98C" opacity="0.82"/><path transform="translate(460 180)" d="M0.0 -30.0 L7.9 -10.9 L28.5 -9.3 L12.8 4.2 L17.6 24.3 L0.0 13.5 L-17.6 24.3 L-12.8 4.2 L-28.5 -9.3 L-7.9 -10.9 Z" fill="#D9C98C" opacity="0.82"/></g>
+  <rect width="600" height="600" fill="url(#vig)"/>
+  <rect width="600" height="600" fill="url(#foot)"/>
+  <rect x="10" y="10" width="580" height="580" rx="26" fill="none" stroke="#ffffff" stroke-opacity="0.07"/>
+  <rect width="600" height="600" fill="none" stroke="#000" stroke-opacity="0.35" stroke-width="16"/>
+</svg>
