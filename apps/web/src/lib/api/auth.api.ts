@@ -1,7 +1,7 @@
 import { http, setTokens } from './client'
 import type { LoginCredentials, RegisterPayload, User } from '@/types'
 
-interface AuthResponse {
+export interface AuthResponse {
   user: User
   accessToken: string
   refreshToken?: string

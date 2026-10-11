@@ -9,7 +9,14 @@ export const env = {
   siteName: process.env.NEXT_PUBLIC_SITE_NAME ?? 'Depkasino',
   referralHost: process.env.NEXT_PUBLIC_REFERRAL_HOST ?? '',
   /** Домен для абсолютных ссылок в RSC/OG. */
-  siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? ''
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? '',
+  /**
+   * OAuth-ключи выдаются на конкретный аккаунт и домен (Google Cloud Console, BotFather) —
+   * их нельзя «найти», только выпустить. Пусто — кнопки работают в демо-режиме мока.
+   * См. docs/integrations.md: раздел «Ключи регистрации».
+   */
+  googleClientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? '',
+  telegramBotUsername: process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME ?? ''
 } as const
 
 export const isMock = env.apiMode === 'mock'
