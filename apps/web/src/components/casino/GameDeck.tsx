@@ -71,12 +71,22 @@ export function GameDeck({ initialGames, className }: { initialGames?: Game[]; c
   }, [current, games, queue.length])
 
   const goBack = useCallback(() => {
-    if (queue.length === 0) return
+    // Свайп вправо = предыдущая карта (§4.4): очередь крутим назад и снимаем отметку
+    // «просмотрено» с карты, которую покидаем, иначе счётчик колоды расходится с фронтом.
+    // До первого свайпа предыдущей карты нет — жест игнорируем.
+    if (queue.length === 0 || seen.size === 0) return
+    // На фронт возвращается хвост очереди — отметку «просмотрено» снимаем именно с него.
+    const returning = queue[queue.length - 1]?.slug
     setOrder((prev) => {
       const slugs = prev ?? games.map((g) => g.slug)
       return [slugs[slugs.length - 1], ...slugs.slice(0, -1)]
     })
-  }, [games, queue.length])
+    setSeen((prev) => {
+      const next = new Set(prev)
+      if (returning) next.delete(returning)
+      return next
+    })
+  }, [games, queue, seen])
 
   const shuffle = useCallback(() => {
     const slugs = games.map((g) => g.slug)
@@ -271,11 +281,19 @@ function DeckCard({
   const rotate = useTransform(x, [-260, 0, 260], [-12, -3, 12])
   const opacity = useTransform(x, [-320, -180, 0, 180, 320], [0.4, 1, 1, 1, 0.4])
   const tapTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  /** Был ли жест драгом: тап сразу после свайпа не должен запускать игру. */
+  const draggedRef = useRef(false)
+  /** Начало нажатия мыши — для вертикального драга запуска на десктопе (§4.4). */
+  const pressRef = useRef<{ x: number; y: number } | null>(null)
 
   useEffect(() => () => { if (tapTimer.current) clearTimeout(tapTimer.current) }, [])
 
   /** Двойной тап — в избранное с heart-burst, одиночный — запуск. */
   const handleTap = () => {
+    if (draggedRef.current) {
+      draggedRef.current = false
+      return
+    }
     if (tapTimer.current) {
       clearTimeout(tapTimer.current)
       tapTimer.current = null
@@ -300,10 +318,41 @@ function DeckCard({
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={0.55}
       dragDirectionLock
+      onPointerDown={(event) => {
+        if (event.pointerType === 'mouse') pressRef.current = { x: event.clientX, y: event.clientY }
+      }}
+      onPointerUp={(event) => {
+        const start = pressRef.current
+        pressRef.current = null
+        if (!start || event.pointerType !== 'mouse') return
+        // Десктоп: драг вверх по фронт-карте = запуск. На таче вертикаль отдана скроллу (§4.4).
+        const dx = event.clientX - start.x
+        const dy = event.clientY - start.y
+        if (dy < -80 && Math.abs(dx) < 60) {
+          if (tapTimer.current) {
+            clearTimeout(tapTimer.current)
+            tapTimer.current = null
+          }
+          onLaunch()
+        }
+      }}
+      onDragStart={() => {
+        draggedRef.current = true
+        // Свайн уже начался: одиночный «тап-запуск» из предыдущего жеста отменяем.
+        if (tapTimer.current) {
+          clearTimeout(tapTimer.current)
+          tapTimer.current = null
+        }
+      }}
       onDragEnd={(_event, info) => {
         const threshold = 110
         if (info.offset.x < -threshold || info.velocity.x < -600) onSwipe()
         else if (info.offset.x > threshold || info.velocity.x > 600) onBack()
+        // Тап-жест приходит сразу после dragEnd; через окно двойного тапа флаг отпускаем,
+        // чтобы следующий одиночный тап снова запускал игру.
+        setTimeout(() => {
+          draggedRef.current = false
+        }, 350)
       }}
       onTap={handleTap}
     >

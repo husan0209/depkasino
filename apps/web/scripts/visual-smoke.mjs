@@ -1,13 +1,14 @@
 /**
  * Интерактивный visual-smoke: реальный браузер, мобильные ширины (360/390/430), живые сценарии —
- * гостевой запуск через LoginSheet, вход, касса, KYC-стоп, oauth-409, переполнение и консоль.
+ * гостевой запуск через LoginSheet, вход, касса, KYC-стоп, oauth-409, жесты колоды (§4.4):
+ * свайпы влево-вправо, кроссфейд при prefers-reduced-motion, драг вверх на десктопе, Escape.
+ * Плюс переполнение по горизонтали и ошибки консоли на 17 маршрутах.
  *
  * Браузер сознательно НЕ в зависимостях проекта (67 МБ): ставится отдельно и только для проверки:
  *   npm i --no-save puppeteer-core @sparticuz/chromium
  *   # распаковать al2023.tar.br и swiftshader.tar.br из пакета (libnspr4/libnss3/libnssutil3),
  *   # шрифты с кириллицей положить в каталог fontconfig
- *   SHOT_LIBS=<папка с lib> FONTCONFIG_PATH=<папка с fonts.conf> \
- *   npm run visual-smoke            # из apps/web, сервер должен быть поднят
+ *   SHOT_LIBS=<папка с lib> FONTCONFIG_PATH=<папка с fonts.conf> npm run visual-smoke
  *
  * Переменные: SHOT_LIBS, SHOT_OUT (куда класть снимки), BASE_URL.
  */
@@ -20,8 +21,8 @@ const OUT = process.env.SHOT_OUT ?? 'visual-smoke-out'
 mkdirSync(OUT, { recursive: true })
 const WIDTHS = [360, 390, 430]
 const report = []
-const fail = (msg) => report.push(`✗ ${msg}`)
-const pass = (msg) => report.push(`✓ ${msg}`)
+const fail = (msg) => { report.push(`✗ ${msg}`); console.log(`✗ ${msg}`) }
+const pass = (msg) => { report.push(`✓ ${msg}`); console.log(`✓ ${msg}`) }
 
 const browser = await puppeteer.launch({
   args: [...chromium.args, '--lang=ru-RU'],
@@ -90,30 +91,27 @@ for (const w of WIDTHS) {
 }
 
 // ── C. Вход через форму ──
-async function login(page) {
+async function loginTokens() {
+  const page = await openPage(390)
   await page.goto(BASE + '/login', { waitUntil: 'networkidle2' })
   await new Promise((r) => setTimeout(r, 600))
   await page.type('input[type="email"], input[name="email"]', 'player@example.com')
   await page.type('input[type="password"]', 'secret123')
   await page.evaluate(() => {
-    const btn = [...document.querySelectorAll('button')].find((b) => /Войти/.test(b.textContent))
-    btn?.click()
+    [...document.querySelectorAll('button')].find((b) => /Войти/.test(b.textContent))?.click()
   })
   await new Promise((r) => setTimeout(r, 1500))
-}
-
-let tokens = null
-{
-  const page = await openPage(390)
-  await login(page)
-  tokens = await page.evaluate(() => ({
+  const t = await page.evaluate(() => ({
     access: localStorage.getItem('dk_access_token'),
     refresh: localStorage.getItem('dk_refresh_token')
   }))
-  if (tokens?.access) pass('вход через форму: токены получены')
-  else fail('вход через форму: токенов нет')
   await page.close()
+  return t
 }
+
+let tokens = await loginTokens()
+if (tokens?.access) pass('вход через форму: токены получены')
+else fail('вход через форму: токенов нет')
 
 // ── D. Защищённые маршруты на трёх ширинах ──
 const PLAYER_ROUTES = ['/wallet', '/wallet/transactions', '/history', '/kyc', '/support', '/referral', '/profile', '/profile/settings', '/profile/sessions', '/favorites']
@@ -192,6 +190,122 @@ for (const w of WIDTHS) {
   if (api.status === 409 && String(api.code).includes('oauth')) pass('oauth: API отвечает 409 oauth_account')
   else fail(`oauth: API вернул ${api.status} ${api.code}`)
   await shot(page, 'security-oauth-390')
+  await page.close()
+}
+
+// ── H. Жесты колоды (§4.4): свайпы, финальная карта, reduced-motion, драг вверх ──
+// Мок одностессионный, как настоящий бэкенд: oauth-вход в G выпустил новую пару токенов,
+// поэтому перед жестами входим заново.
+tokens = await loginTokens()
+async function deckCounter(page) {
+  return page.evaluate(() => {
+    const el = [...document.querySelectorAll('span,div,p')].find((n) => /^\d+\/\d+$/.test(n.textContent.trim()))
+    return el ? el.textContent.trim() : null
+  })
+}
+async function swipe(page, fromX, toX, y) {
+  const client = await page.createCDPSession()
+  const steps = 12
+  await client.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: fromX, y }] })
+  for (let i = 1; i <= steps; i += 1) {
+    const x = fromX + ((toX - fromX) * i) / steps
+    await client.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x, y }] })
+    await new Promise((r) => setTimeout(r, 16))
+  }
+  await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+  await new Promise((r) => setTimeout(r, 900))
+}
+{
+  const page = await openPage(390, tokens)
+  await page.goto(BASE + '/', { waitUntil: 'networkidle2' })
+  await new Promise((r) => setTimeout(r, 900))
+  const before = await deckCounter(page)
+  await swipe(page, 320, 60, 620)
+  const afterLeft = await deckCounter(page)
+  if (before && afterLeft && before !== afterLeft) pass(`свайп влево листает колоду: ${before} → ${afterLeft}`)
+  else fail(`свайп влево не листает: ${before} → ${afterLeft}`)
+  await swipe(page, 60, 320, 620)
+  const afterRight = await deckCounter(page)
+  if (afterRight === before) pass('свайп вправо возвращает предыдущую карту')
+  else fail(`свайп вправо: ${afterLeft} → ${afterRight}, ждали ${before}`)
+  await shot(page, 'deck-after-swipe-390')
+  await page.close()
+}
+{
+  // prefers-reduced-motion: колода работает, но без параллакса (кроссфейд)
+  const page = await openPage(390, tokens)
+  await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }])
+  await page.goto(BASE + '/', { waitUntil: 'networkidle2' })
+  await new Promise((r) => setTimeout(r, 900))
+  const before = await deckCounter(page)
+  await swipe(page, 320, 60, 620)
+  const after = await deckCounter(page)
+  if (before && after && before !== after) pass('reduced-motion: колода листается кроссфейдом')
+  else fail(`reduced-motion: колода не листается (${before} → ${after})`)
+  await page.close()
+}
+{
+  // Десктоп: драг вверх по фронт-карте = запуск (§4.4)
+  const page = await browser.newPage()
+  await page.setViewport({ width: 1280, height: 900 })
+  page._errs = []
+  page.on('pageerror', (e) => page._errs.push(e.message.slice(0, 100)))
+  await page.goto(BASE + '/', { waitUntil: 'domcontentloaded' })
+  await page.evaluate((t) => {
+    localStorage.clear()
+    localStorage.setItem('dk_access_token', t.access)
+    localStorage.setItem('dk_refresh_token', t.refresh)
+  }, tokens)
+  await page.goto(BASE + '/', { waitUntil: 'networkidle2' })
+  await new Promise((r) => setTimeout(r, 1000))
+  const card = await page.evaluate(() => {
+    const title = [...document.querySelectorAll('p')].find((n) => n.textContent.trim() === 'Sweet Bonanza')
+    const target = title?.closest('div')
+    if (!target) return null
+    const r = target.getBoundingClientRect()
+    return { x: r.x + r.width / 2, y: r.y + r.height / 2 }
+  })
+  if (!card) fail('десктоп: не нашёл фронт-карту колоды для драга')
+  else {
+    await page.mouse.move(card.x, card.y)
+    await page.mouse.down()
+    for (let i = 1; i <= 10; i += 1) {
+      await page.mouse.move(card.x, card.y - i * 22, { steps: 2 })
+      await new Promise((r) => setTimeout(r, 16))
+    }
+    await page.mouse.up()
+    await new Promise((r) => setTimeout(r, 1500))
+    if (page.url().includes('/play?game=')) pass('десктоп: драг вверх по фронт-карте запускает игру')
+    else fail(`десктоп: драг вверх не запустил игру, url=${page.url()}`)
+  }
+  await page.close()
+}
+{
+  // Escape закрывает DepositSheet
+  const page = await openPage(390, tokens)
+  await page.goto(BASE + '/', { waitUntil: 'networkidle2' })
+  await new Promise((r) => setTimeout(r, 700))
+  try {
+    await page.waitForSelector('[aria-label="Пополнить"]', { timeout: 8000 })
+  } catch {
+    const diag = await page.evaluate(() => ({
+      url: location.href,
+      header: document.querySelector('header')?.innerText.replace(/\n/g, ' | ').slice(0, 100),
+      session: document.documentElement.getAttribute('data-session')
+    }))
+    fail(`Escape-шаг: нет кнопки депозита: ${JSON.stringify(diag)}`)
+    await page.close()
+    await browser.close()
+    console.log(report.join('\n'))
+    process.exit(1)
+  }
+  await page.click('[aria-label="Пополнить"]')
+  await new Promise((r) => setTimeout(r, 800))
+  await page.keyboard.press('Escape')
+  await new Promise((r) => setTimeout(r, 600))
+  const still = await page.evaluate(() => /Сумма пополнения|Способ пополнения/.test(document.body.innerText))
+  if (!still) pass('Escape закрывает DepositSheet')
+  else fail('Escape не закрыл DepositSheet')
   await page.close()
 }
 
