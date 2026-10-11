@@ -9,7 +9,8 @@
     "build": "npm --workspace @depkasino/web run build",
     "start": "npm --workspace @depkasino/web run start",
     "lint": "npm --workspace @depkasino/web run lint",
-    "typecheck": "npm --workspace @depkasino/web run typecheck"
+    "typecheck": "npm --workspace @depkasino/web run typecheck",
+    "acceptance": "npm --workspace @depkasino/web run acceptance"
   },
   "engines": { "node": ">=20" }
 }
