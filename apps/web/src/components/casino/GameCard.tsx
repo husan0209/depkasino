@@ -119,7 +119,7 @@ export function LastPlayedCard({ game, playedAt }: { game: Game; playedAt: strin
         type="button"
         aria-label={`Продолжить ${game.title}`}
         onClick={() => launch(game)}
-        className="absolute bottom-10 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-accent text-white shadow-accent transition-transform hover:scale-105"
+        className="absolute bottom-10 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-accent text-white shadow-lift transition-transform hover:scale-105"
       >
         <Play className="h-4 w-4" />
       </button>

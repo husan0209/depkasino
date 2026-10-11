@@ -2,30 +2,35 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600" role="img" aria-label="fruit-party">
   <defs>
     <radialGradient id="bg" cx="50%" cy="38%" r="72%">
-      <stop offset="0%" stop-color="#D62828" stop-opacity="0.95"/>
-      <stop offset="52%" stop-color="#2B0A0A"/>
+      <stop offset="0%" stop-color="#A83A32" stop-opacity="0.5"/>
+      <stop offset="55%" stop-color="#200D0B"/>
       <stop offset="100%" stop-color="#08080F"/>
     </radialGradient>
     <linearGradient id="coinGrad" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#FFE066"/>
-      <stop offset="100%" stop-color="#D62828"/>
+      <stop offset="0%" stop-color="#D9B45C"/>
+      <stop offset="100%" stop-color="#A83A32"/>
     </linearGradient>
     <linearGradient id="pyramidGrad" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#FFE066"/>
-      <stop offset="100%" stop-color="#D62828"/>
+      <stop offset="0%" stop-color="#D9B45C"/>
+      <stop offset="100%" stop-color="#A83A32"/>
     </linearGradient>
     <linearGradient id="flameGrad" x1="0" y1="1" x2="0" y2="0">
-      <stop offset="0%" stop-color="#D62828"/>
-      <stop offset="100%" stop-color="#FF7A00"/>
+      <stop offset="0%" stop-color="#A83A32"/>
+      <stop offset="100%" stop-color="#D96A2E"/>
     </linearGradient>
-    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="18" result="b"/>
-      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
+    <radialGradient id="vig" cx="50%" cy="42%" r="78%">
+      <stop offset="52%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#05050A" stop-opacity="0.72"/>
+    </radialGradient>
+    <linearGradient id="foot" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="62%" stop-color="#07070D" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#07070D" stop-opacity="0.8"/>
+    </linearGradient>
   </defs>
   <rect width="600" height="600" fill="url(#bg)"/>
-  <g opacity="0.22"><path d="M300 300 L760 300" stroke="#FF7A00" stroke-width="26" stroke-linecap="round"/><path d="M300 300 L652.3804438347299 595.682300455808" stroke="#FF7A00" stroke-width="26" stroke-linecap="round"/><path d="M300 300 L379.878161726788 753.0115663856157" stroke="#FF7A00" stroke-width="26" stroke-linecap="round"/><path d="M300 300 L70.00000000000011 698.3716857408418" stroke="#FF7A00" stroke-width="26" stroke-linecap="round"/><path d="M300 300 L-132.2586055615178 457.32926592980766" stroke="#FF7A00" stroke-width="26" stroke-linecap="round"/><path d="M300 300 L-132.25860556151787 142.67073407019242" stroke="#FF7A00" stroke-width="26" stroke-linecap="round"/><path d="M300 300 L69.9999999999998 -98.37168574084171" stroke="#FF7A00" stroke-width="26" stroke-linecap="round"/><path d="M300 300 L379.87816172678777 -153.01156638561577" stroke="#FF7A00" stroke-width="26" stroke-linecap="round"/><path d="M300 300 L652.3804438347297 4.3176995441917825" stroke="#FF7A00" stroke-width="26" stroke-linecap="round"/></g>
-  <g filter="url(#glow)"><circle cx="190" cy="380" r="84" fill="#D62828" opacity="0.85"/><circle cx="390" cy="400" r="70" fill="#FF7A00" opacity="0.85"/><circle cx="300" cy="220" r="96" fill="#FFE066" opacity="0.85"/><circle cx="300" cy="220" r="60" fill="#FF7A00" opacity="0.85"/><circle cx="300" cy="300" r="205" fill="none" stroke="#FF7A00" stroke-width="45.1" opacity="0.8"/><path transform="translate(140 180)" d="M0.0 -26.0 L6.9 -9.5 L24.7 -8.0 L11.1 3.6 L15.3 21.0 L0.0 11.7 L-15.3 21.0 L-11.1 3.6 L-24.7 -8.0 L-6.9 -9.5 Z" fill="#FFE066" opacity="0.95"/><path transform="translate(470 210)" d="M0.0 -32.0 L8.5 -11.6 L30.4 -9.9 L13.7 4.4 L18.8 25.9 L0.0 14.4 L-18.8 25.9 L-13.7 4.4 L-30.4 -9.9 L-8.5 -11.6 Z" fill="#FF7A00" opacity="0.95"/></g>
+  <g><circle cx="190" cy="380" r="84" fill="#A83A32" opacity="0.68"/><circle cx="390" cy="400" r="70" fill="#D96A2E" opacity="0.68"/><circle cx="300" cy="220" r="96" fill="#D9B45C" opacity="0.68"/><circle cx="300" cy="220" r="60" fill="#D96A2E" opacity="0.68"/><circle cx="300" cy="300" r="205" fill="none" stroke="#D96A2E" stroke-width="30.75" opacity="0.5"/><path transform="translate(140 180)" d="M0.0 -26.0 L6.9 -9.5 L24.7 -8.0 L11.1 3.6 L15.3 21.0 L0.0 11.7 L-15.3 21.0 L-11.1 3.6 L-24.7 -8.0 L-6.9 -9.5 Z" fill="#D9B45C" opacity="0.82"/><path transform="translate(470 210)" d="M0.0 -32.0 L8.5 -11.6 L30.4 -9.9 L13.7 4.4 L18.8 25.9 L0.0 14.4 L-18.8 25.9 L-13.7 4.4 L-30.4 -9.9 L-8.5 -11.6 Z" fill="#D96A2E" opacity="0.82"/></g>
+  <rect width="600" height="600" fill="url(#vig)"/>
+  <rect width="600" height="600" fill="url(#foot)"/>
   <rect x="10" y="10" width="580" height="580" rx="26" fill="none" stroke="#ffffff" stroke-opacity="0.07"/>
   <rect width="600" height="600" fill="none" stroke="#000" stroke-opacity="0.35" stroke-width="16"/>
 </svg>

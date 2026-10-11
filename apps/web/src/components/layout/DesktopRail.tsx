@@ -26,7 +26,7 @@ export function DesktopRail() {
 
   return (
     <aside className="fixed left-0 top-0 z-40 hidden h-dvh w-[72px] flex-col items-center gap-1 border-r border-line/70 bg-bg-primary/95 py-4 backdrop-blur md:flex">
-      <Link href="/" aria-label="На главную" className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-accent shadow-accent">
+      <Link href="/" aria-label="На главную" className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-accent shadow-lift">
         <svg viewBox="0 0 24 24" aria-hidden className="h-5 w-5 text-white">
           <path d="M12 2 3 6.5v6.2c0 4.6 3.4 8 9 9.3 5.6-1.3 9-4.7 9-9.3V6.5L12 2Z" fill="currentColor" opacity="0.9" />
           <path d="m12 7 1.6 3.4L17 12l-3.4 1.6L12 17l-1.6-3.4L7 12l3.4-1.6L12 7Z" fill="#0F0F1A" />

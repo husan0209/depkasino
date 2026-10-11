@@ -311,7 +311,7 @@ function DeckCard({
           {game.badge && <Badge variant={game.badge === 'NEW' ? 'new' : 'hot'}>{game.badge}</Badge>}
           {/* Контекстный BIG WIN: плашка крепится к карте-виновнику и свайпается с ней */}
           {win && (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-money/40 bg-money/15 px-2.5 py-1 text-2xs font-semibold text-money backdrop-blur">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-money/35 bg-[#08130C]/85 px-2.5 py-1 text-2xs font-semibold text-money">
               <CurrencyAmount amount={win.amount} currency={win.currency} context="wallet" showPlus />
               только что
             </span>

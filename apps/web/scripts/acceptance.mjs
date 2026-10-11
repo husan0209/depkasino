@@ -393,6 +393,18 @@ function sourceFlow() {
   check('есть скелетон перехода между разделами', loading.includes('MainLoading'))
   check('live-режим без адреса API предупреждает', /MODE=live, но NEXT_PUBLIC_API_URL пуст/.test(readFileSync(path.join(srcRoot, 'lib/env.ts'), 'utf8')))
 
+  // Именованная тень с именем цвета палитры превращается в неоновый ореол: Tailwind генерирует
+  // второе правило shadow-* и перекрашивает тень сплошным цветом. Страховка от рецидива.
+  const tw = readFileSync(path.join(webRoot, 'tailwind.config.ts'), 'utf8')
+  const box = tw.match(/boxShadow:\s*\{([\s\S]*?)\n      \}/)?.[1] ?? ''
+  const shadowKeys = [...box.matchAll(/^ {8}([a-z-]+):/gm)].map((m) => m[1])
+  const colorsBlock = tw.match(/colors:\s*\{([\s\S]*?)\n      \}/)?.[1] ?? ''
+  // Только верхний уровень: вложенные листья регистрируются как пунктирные имена (bg-card),
+  // а «голое» имя цвета верхнего уровня (accent) и даёт конфликтующее правило shadow-accent.
+  const colorKeys = [...colorsBlock.matchAll(/^ {8}([a-z-]+):/gm)].map((m) => m[1])
+  const clash = shadowKeys.filter((k) => colorKeys.includes(k))
+  check('имена теней не совпадают с именами цветов (нет неонового ореола)', clash.length === 0)
+
   const flags = readFileSync(path.join(srcRoot, 'constants/currencies.ts'), 'utf8')
   const enabled = [...flags.matchAll(/FEATURE_[A-Z_]+:\s*(true|false)/g)].filter((match) => match[1] === 'true')
   check('бонусные флаги выключены', enabled.length === 0, enabled.map((match) => match[0]).join(', '))

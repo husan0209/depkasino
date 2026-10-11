@@ -13,11 +13,11 @@ type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'money'
 type Size = 'sm' | 'md' | 'lg'
 
 const variants: Record<Variant, string> = {
-  primary: 'bg-accent text-white hover:bg-accent-hover shadow-accent',
+  primary: 'bg-accent text-white hover:bg-accent-hover shadow-lift',
   secondary: 'bg-bg-secondary text-ink border border-line hover:border-accent/60 hover:text-white',
   ghost: 'bg-transparent text-ink-muted hover:bg-bg-secondary hover:text-ink',
   danger: 'bg-danger/15 text-danger border border-danger/40 hover:bg-danger/25',
-  money: 'bg-money text-[#04220F] hover:bg-money-hover shadow-money'
+  money: 'bg-money text-[#04220F] hover:bg-money-hover shadow-lift'
 }
 
 const sizes: Record<Size, string> = {

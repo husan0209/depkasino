@@ -31,16 +31,16 @@ const GAMES = [
 ]
 
 const PALETTES = {
-  sweet: { a: '#FF4E9B', b: '#7B2FF7', c: '#FFD166', d: '#2A0B3B' },
-  sky: { a: '#00D2FF', b: '#6C63FF', c: '#FFE29A', d: '#0B1030' },
-  ocean: { a: '#00C6AE', b: '#0B5FA5', c: '#8BE9FD', d: '#04182B' },
-  jungle: { a: '#7ED957', b: '#1F7A3D', c: '#FFC93C', d: '#08210F' },
-  fruit: { a: '#FF7A00', b: '#D62828', c: '#FFE066', d: '#2B0A0A' },
-  egypt: { a: '#FFB300', b: '#B8860B', c: '#7FE3FF', d: '#1B1004' },
-  gems: { a: '#8C6BFF', b: '#00D2FF', c: '#FF9FF3', d: '#0C0A22' },
-  coins: { a: '#FFC93C', b: '#FF8A00', c: '#FFF3B0', d: '#241100' },
-  flame: { a: '#FF6B00', b: '#FF2D55', c: '#FFD166', d: '#210304' },
-  noir: { a: '#FF3D71', b: '#6C63FF', c: '#E7E7FF', d: '#0A0A16' }
+  sweet: { a: '#C94F86', b: '#6B4BB8', c: '#D9AE5F', d: '#1D0F26' },
+  sky: { a: '#4FA8C9', b: '#5A5FBF', c: '#D8C58F', d: '#0D1226' },
+  ocean: { a: '#2E9C8C', b: '#1F5E8C', c: '#7FBFD4', d: '#06141F' },
+  jungle: { a: '#5FA84A', b: '#2C6B3F', c: '#C9A84C', d: '#0A1A0F' },
+  fruit: { a: '#D96A2E', b: '#A83A32', c: '#D9B45C', d: '#200D0B' },
+  egypt: { a: '#C99A3D', b: '#8C6B2E', c: '#7FB4C9', d: '#171006' },
+  gems: { a: '#7A66C9', b: '#3E9CC9', c: '#C97FB4', d: '#100E1E' },
+  coins: { a: '#C9A03D', b: '#C97A2E', c: '#D9C98C', d: '#1C1004' },
+  flame: { a: '#D9622E', b: '#C93A4A', c: '#D9AE5F', d: '#1A0607' },
+  noir: { a: '#C94A66', b: '#5A5FBF', c: '#C9C9DE', d: '#0C0C14' }
 }
 
 /** Мотивы рисуются крупной геометрией: без текста, без эмодзи. */
@@ -52,7 +52,7 @@ function motif(kind, p) {
     push(
       `<g transform="translate(${x} ${y}) rotate(${rotate})">
         <path d="M0 ${-r} L${r * 0.85} ${-r * 0.25} L0 ${r} L${-r * 0.85} ${-r * 0.25} Z" fill="${fill}" opacity="0.95"/>
-        <path d="M0 ${-r} L${r * 0.85} ${-r * 0.25} L0 ${-r * 0.2} Z" fill="#ffffff" opacity="0.45"/>
+        <path d="M0 ${-r} L${r * 0.85} ${-r * 0.25} L0 ${-r * 0.2} Z" fill="#ffffff" opacity="0.28"/>
         <path d="M${-r * 0.85} ${-r * 0.25} L0 ${-r * 0.2} L0 ${r} Z" fill="#000000" opacity="0.18"/>
       </g>`
     )
@@ -60,24 +60,24 @@ function motif(kind, p) {
     push(
       `<g transform="translate(${x} ${y})">
         <circle r="${r}" fill="url(#coinGrad)"/>
-        <circle r="${r * 0.7}" fill="none" stroke="#ffffff" stroke-opacity="0.55" stroke-width="${r * 0.12}"/>
+        <circle r="${r * 0.7}" fill="none" stroke="#ffffff" stroke-opacity="0.38" stroke-width="${r * 0.12}"/>
         <path d="M0 ${-r * 0.42} L${r * 0.36} 0 L0 ${r * 0.42} L${-r * 0.36} 0 Z" fill="#8A5A00" opacity="0.75"/>
       </g>`
     )
   const star = (x, y, r, fill) =>
     push(
-      `<path transform="translate(${x} ${y})" d="${starPath(r)}" fill="${fill}" opacity="0.95"/>`
+      `<path transform="translate(${x} ${y})" d="${starPath(r)}" fill="${fill}" opacity="0.82"/>`
     )
   const ring = (x, y, r, fill) =>
-    push(`<circle cx="${x}" cy="${y}" r="${r}" fill="none" stroke="${fill}" stroke-width="${r * 0.22}" opacity="0.8"/>`)
-  const blob = (x, y, r, fill) => push(`<circle cx="${x}" cy="${y}" r="${r}" fill="${fill}" opacity="0.85"/>`)
+    push(`<circle cx="${x}" cy="${y}" r="${r}" fill="none" stroke="${fill}" stroke-width="${r * 0.15}" opacity="0.5"/>`)
+  const blob = (x, y, r, fill) => push(`<circle cx="${x}" cy="${y}" r="${r}" fill="${fill}" opacity="0.68"/>`)
   const wave = (y, fill) =>
     push(
-      `<path d="M0 ${y} C 120 ${y - 32}, 240 ${y + 32}, 360 ${y} C 480 ${y - 32}, 560 ${y + 16}, 600 ${y} L600 600 L0 600 Z" fill="${fill}" opacity="0.55"/>`
+      `<path d="M0 ${y} C 120 ${y - 32}, 240 ${y + 32}, 360 ${y} C 480 ${y - 32}, 560 ${y + 16}, 600 ${y} L600 600 L0 600 Z" fill="${fill}" opacity="0.45"/>`
     )
   const stripes = (fill) => {
     for (let i = 0; i < 5; i += 1) {
-      push(`<path d="M${60 + i * 120} -20 C ${100 + i * 120} 180, ${20 + i * 120} 360, ${70 + i * 120} 620" stroke="${fill}" stroke-width="22" fill="none" opacity="0.5"/>`)
+      push(`<path d="M${60 + i * 120} -20 C ${100 + i * 120} 180, ${20 + i * 120} 360, ${70 + i * 120} 620" stroke="${fill}" stroke-width="16" fill="none" opacity="0.3"/>`)
     }
   }
   const pyramid = () =>
@@ -164,8 +164,8 @@ function coverSvg(slug, kind) {
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600" role="img" aria-label="${slug}">
   <defs>
     <radialGradient id="bg" cx="50%" cy="38%" r="72%">
-      <stop offset="0%" stop-color="${p.b}" stop-opacity="0.95"/>
-      <stop offset="52%" stop-color="${p.d}"/>
+      <stop offset="0%" stop-color="${p.b}" stop-opacity="0.5"/>
+      <stop offset="55%" stop-color="${p.d}"/>
       <stop offset="100%" stop-color="#08080F"/>
     </radialGradient>
     <linearGradient id="coinGrad" x1="0" y1="0" x2="0" y2="1">
@@ -180,16 +180,19 @@ function coverSvg(slug, kind) {
       <stop offset="0%" stop-color="${p.b}"/>
       <stop offset="100%" stop-color="${p.a}"/>
     </linearGradient>
-    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="18" result="b"/>
-      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
+    <radialGradient id="vig" cx="50%" cy="42%" r="78%">
+      <stop offset="52%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#05050A" stop-opacity="0.72"/>
+    </radialGradient>
+    <linearGradient id="foot" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="62%" stop-color="#07070D" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#07070D" stop-opacity="0.8"/>
+    </linearGradient>
   </defs>
   <rect width="600" height="600" fill="url(#bg)"/>
-  <g opacity="0.22">${Array.from({ length: 9 })
-    .map((_, i) => `<path d="M300 300 L${300 + Math.cos((i / 9) * Math.PI * 2) * 460} ${300 + Math.sin((i / 9) * Math.PI * 2) * 460}" stroke="${p.a}" stroke-width="26" stroke-linecap="round"/>`)
-    .join('')}</g>
-  <g filter="url(#glow)">${motif(kind, p)}</g>
+  <g>${motif(kind, p)}</g>
+  <rect width="600" height="600" fill="url(#vig)"/>
+  <rect width="600" height="600" fill="url(#foot)"/>
   <rect x="10" y="10" width="580" height="580" rx="26" fill="none" stroke="#ffffff" stroke-opacity="0.07"/>
   <rect width="600" height="600" fill="none" stroke="#000" stroke-opacity="0.35" stroke-width="16"/>
 </svg>
@@ -202,8 +205,8 @@ function providerSvg(name, color, short) {
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 120" width="240" height="120" role="img" aria-label="${name}">
   <defs>
     <linearGradient id="pg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="${color}"/>
-      <stop offset="100%" stop-color="#141428"/>
+      <stop offset="0%" stop-color="${color}" stop-opacity="0.75"/>
+      <stop offset="100%" stop-color="#101020"/>
     </linearGradient>
   </defs>
   <rect width="240" height="120" rx="18" fill="url(#pg)"/>
